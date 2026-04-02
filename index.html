@@ -1,0 +1,1896 @@
+<!doctype html>
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>ARCHAEOLOGIST_OS | ARES RETRO EDITION</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700;900&family=Work+Sans:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-lowest": "#0e0e0e",
+              "surface-variant": "#353534",
+              "surface-bright": "#3a3939",
+              "primary-container": "#00ff41",
+              primary: "#ebffe2",
+              "on-primary": "#003907",
+              surface: "#131313",
+              outline: "#84967e",
+              "outline-variant": "#3b4b37",
+              "surface-container-high": "#2a2a2a",
+              "surface-container": "#201f1f",
+              "on-surface": "#e5e2e1",
+              "on-surface-variant": "#b9ccb2",
+              background: "#131313",
+              "tertiary-fixed-dim": "#00daf3",
+            },
+            fontFamily: {
+              headline: ["Space Grotesk"],
+              body: ["Work Sans"],
+              mono: ["Space Grotesk"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .crt-overlay {
+        background:
+          linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+          linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.03),
+            rgba(0, 255, 0, 0.01),
+            rgba(0, 0, 255, 0.03)
+          );
+        background-size:
+          100% 2px,
+          3px 100%;
+        pointer-events: none;
+      }
+      .dither-bg {
+        background-image: radial-gradient(#3b4b37 0.5px, transparent 0.5px);
+        background-size: 3px 3px;
+      }
+      .beveled-inset {
+        box-shadow:
+          inset 2px 2px 0px 0px #0e0e0e,
+          inset -1px -1px 0px 0px #3b4b37;
+      }
+      .glow-text {
+        text-shadow: 0 0 8px #00ff41;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #3b4b37;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #00ff41;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background text-on-surface font-body overflow-hidden selection:bg-primary-container selection:text-on-primary"
+  >
+    <header
+      class="bg-[#131313] dark:bg-[#131313] fixed top-0 w-full z-50 flex justify-between items-center px-6 py-3 border-b border-[#3B4B37]/20"
+    >
+      <div class="flex items-center gap-8">
+        <span
+          class="font-['Space_Grotesk'] font-black text-[#00FF41] tracking-tighter text-xl"
+          >ARES_OS</span
+        >
+        <nav class="hidden md:flex gap-6">
+          <a
+            id="nav-system"
+            class="font-['Space_Grotesk'] uppercase tracking-widest text-sm text-[#00FF41] border-b-2 border-[#00FF41] pb-1"
+            href="#"
+            >SYSTEM</a
+          >
+          <a
+            id="nav-decode"
+            class="font-['Space_Grotesk'] uppercase tracking-widest text-sm text-[#B9CCB2] hover:text-[#00FF41] transition-colors duration-100"
+            href="#"
+            >DECODE</a
+          >
+          <a
+            id="nav-archive"
+            class="font-['Space_Grotesk'] uppercase tracking-widest text-sm text-[#B9CCB2] hover:text-[#00FF41] transition-colors duration-100"
+            href="#"
+            >ARCHIVE</a
+          >
+        </nav>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="relative hidden sm:block">
+          <input
+            id="query-stream-input"
+            class="bg-surface-container-lowest border-none beveled-inset text-primary-container placeholder:text-outline-variant text-xs font-mono py-1 px-3 w-48 focus:ring-0"
+            placeholder="QUERY_STREAM..."
+            type="text"
+          />
+        </div>
+        <span
+          id="settings-btn"
+          class="material-symbols-outlined text-[#B9CCB2] hover:text-[#00FF41] cursor-pointer"
+          data-icon="settings"
+          >settings</span
+        >
+        <span
+          id="terminal-btn"
+          class="material-symbols-outlined text-[#B9CCB2] hover:text-[#00FF41] cursor-pointer"
+          data-icon="terminal"
+          >terminal</span
+        >
+      </div>
+    </header>
+
+    <div class="flex h-screen pt-14 pb-20">
+      <aside
+        class="bg-[#1C1B1B] dark:bg-[#1C1B1B] h-full w-64 hidden lg:flex flex-col border-r border-[#3B4B37]/20 py-4"
+      >
+        <div class="px-4 mb-8 flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden"
+          >
+            <img
+              alt="OPERATOR_01"
+              class="w-full h-full object-cover"
+              src="https://ui-avatars.com/api/?name=Op&background=00ff41&color=003907"
+            />
+          </div>
+          <div>
+            <h3
+              class="font-['Work_Sans'] font-mono text-xs uppercase text-primary-container font-bold"
+            >
+              OPERATOR_01
+            </h3>
+            <p
+              class="font-['Work_Sans'] font-mono text-[10px] uppercase text-[#B9CCB2]"
+            >
+              STATUS: DECODING
+            </p>
+          </div>
+        </div>
+        <nav class="flex-1 space-y-1">
+          <a
+            id="nav-collection"
+            class="bg-[#00FF41] text-[#003907] font-bold p-3 flex items-center gap-3 transition-transform active:translate-x-1"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="library_music"
+              >library_music</span
+            >
+            <span class="font-['Work_Sans'] font-mono text-xs uppercase"
+              >COLLECTION</span
+            >
+          </a>
+          <a
+            id="nav-frequency"
+            class="text-[#B9CCB2] p-3 flex items-center gap-3 hover:bg-[#3A3939] transition-transform active:translate-x-1"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="radar"
+              >radar</span
+            >
+            <span class="font-['Work_Sans'] font-mono text-xs uppercase"
+              >FREQUENCY</span
+            >
+          </a>
+          <a
+            id="nav-bitstream"
+            class="text-[#B9CCB2] p-3 flex items-center gap-3 hover:bg-[#3A3939] transition-transform active:translate-x-1"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="dataset"
+              >dataset</span
+            >
+            <span class="font-['Work_Sans'] font-mono text-xs uppercase"
+              >BITSTREAM</span
+            >
+          </a>
+          <a
+            id="nav-vault"
+            class="text-[#B9CCB2] p-3 flex items-center gap-3 hover:bg-[#3A3939] transition-transform active:translate-x-1"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="inventory_2"
+              >inventory_2</span
+            >
+            <span class="font-['Work_Sans'] font-mono text-xs uppercase"
+              >VAULT</span
+            >
+          </a>
+          <a
+            id="nav-terminal"
+            class="text-[#B9CCB2] p-3 flex items-center gap-3 hover:bg-[#3A3939] transition-transform active:translate-x-1"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="code">code</span>
+            <span class="font-['Work_Sans'] font-mono text-xs uppercase"
+              >TERMINAL</span
+            >
+          </a>
+        </nav>
+        <div class="px-4 mt-auto">
+          <button
+            id="auth-btn"
+            class="w-full bg-primary-container text-on-primary font-mono text-xs font-bold py-2 tracking-widest hover:brightness-110 active:scale-95 transition-all"
+          >
+            MOUNT_DRIVE
+          </button>
+          <div
+            id="logout-container"
+            class="mt-4 text-[#B9CCB2] p-3 flex items-center gap-3 hover:bg-[#3A3939] cursor-pointer"
+          >
+            <span
+              class="material-symbols-outlined"
+              data-icon="power_settings_new"
+              >power_settings_new</span
+            >
+            <span class="font-['Work_Sans'] font-mono text-xs uppercase"
+              >LOGOUT</span
+            >
+          </div>
+        </div>
+      </aside>
+
+      <main class="flex-1 flex flex-col md:flex-row relative overflow-hidden">
+        <section
+          class="w-full md:flex-grow bg-surface-container-lowest relative flex flex-col items-center justify-center overflow-hidden border-r border-outline-variant/10"
+        >
+          <div class="absolute inset-0 dither-bg opacity-20"></div>
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-primary-container/5 via-transparent to-tertiary-fixed-dim/5"
+          ></div>
+
+          <div
+            class="relative w-full h-full flex items-center justify-center p-8"
+          >
+            <div class="absolute top-8 left-8 flex flex-col gap-1">
+              <span
+                class="text-primary-container font-mono text-[10px] tracking-[0.2em] uppercase"
+                >Visualizer_Stream_Alpha</span
+              >
+              <span
+                class="text-tertiary-fixed-dim font-mono text-[10px] tracking-[0.2em] uppercase"
+                >SIGNAL_STRENGTH: 98.4%</span
+              >
+            </div>
+
+            <div class="w-full max-w-lg aspect-square relative">
+              <div
+                id="ferrofluid-container"
+                class="w-full h-full mix-blend-screen opacity-90 drop-shadow-[0_0_20px_rgba(0,255,65,0.4)]"
+              ></div>
+              <div
+                class="absolute inset-0 pointer-events-none border border-primary-container/20"
+              ></div>
+            </div>
+
+            <div class="absolute bottom-8 left-8 right-8">
+              <div class="flex justify-between items-end mb-4">
+                <div>
+                  <h1
+                    id="track-title"
+                    class="font-headline font-black text-4xl md:text-5xl lg:text-7xl text-primary-container glow-text leading-none uppercase tracking-tighter"
+                  >
+                    ARES SYSTEM
+                  </h1>
+                  <p
+                    id="track-artist"
+                    class="font-mono text-xs text-[#B9CCB2] mt-2 uppercase tracking-widest opacity-80"
+                  >
+                    Phase: Standby // 00:00 / 00:00
+                  </p>
+                </div>
+                <div class="text-right hidden sm:block">
+                  <p
+                    class="font-mono text-[10px] text-tertiary-fixed-dim uppercase"
+                  >
+                    Buffer: Stable
+                  </p>
+                  <p
+                    class="font-mono text-[10px] text-tertiary-fixed-dim uppercase"
+                  >
+                    Bitrate: 1411kbps
+                  </p>
+                </div>
+              </div>
+              <div
+                class="h-2 w-full bg-surface-container-low flex gap-0.5 overflow-hidden border border-outline-variant/20 p-[1px]"
+              >
+                <div
+                  id="progress-container"
+                  class="h-2 w-full bg-surface-container-high/50 overflow-hidden border border-outline-variant/20 cursor-pointer relative group p-[1px]"
+                >
+                  <div
+                    id="progress-bar"
+                    class="h-full bg-primary-container w-0 transition-all duration-300 relative"
+                  >
+                    <div
+                      class="absolute right-0 top-0 bottom-0 w-1 bg-white opacity-0 group-hover:opacity-100 shadow-[0_0_8px_#ffffff]"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="right-panel"
+          class="w-full md:w-2/5 bg-surface flex flex-col relative z-10"
+        >
+          <div
+            id="btn-toggle-panel"
+            class="absolute -left-6 top-1/2 -translate-y-1/2 w-6 h-16 bg-surface-container-low border border-outline-variant/20 rounded-l-md flex items-center justify-center cursor-pointer text-[#B9CCB2] hover:text-[#00FF41] shadow-[-4px_0_10px_rgba(0,0,0,0.3)] z-50"
+          >
+            <span
+              id="toggle-chevron"
+              class="material-symbols-outlined text-sm transition-transform duration-500"
+              data-icon="chevron_right"
+              >chevron_right</span
+            >
+          </div>
+          <div
+            class="p-6 border-b border-outline-variant/20 bg-surface-container-low"
+          >
+            <div class="flex justify-between items-center mb-6">
+              <h2
+                class="font-headline font-bold text-lg text-primary-container tracking-widest uppercase"
+              >
+                Stream_Queue
+              </h2>
+              <span class="text-[#B9CCB2] font-mono text-[10px]"
+                >VER: 4.2.0_ARES</span
+              >
+            </div>
+            <div class="relative group">
+              <div
+                class="absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-primary-container"
+              >
+                <span
+                  class="material-symbols-outlined text-sm"
+                  data-icon="search"
+                  >search</span
+                >
+              </div>
+              <input
+                id="search-input"
+                class="w-full bg-surface-container-lowest border-none beveled-inset pl-10 pr-4 py-3 text-xs font-mono text-primary-container placeholder:text-outline-variant focus:ring-1 focus:ring-primary-container transition-all"
+                placeholder="FILTER_TRACKS..."
+                type="text"
+              />
+            </div>
+          </div>
+
+          <div
+            id="track-list"
+            class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-2"
+          >
+            <div class="text-center p-8 text-outline-variant font-mono text-xs">
+              <p>> WAITING FOR QUERY...</p>
+              <p>> OR CLICK 'ARCHIVE' TO LOAD PLAYLISTS</p>
+            </div>
+          </div>
+
+          <div
+            class="p-4 bg-surface-container-lowest border-t border-outline-variant/20 font-mono text-[9px] text-primary-container/60 space-y-1"
+          >
+            <p id="sys-buffer-status">> LOADING_BUFFER... SUCCESS</p>
+            <p id="sys-codec-status">> DECODING_FLAC... 1411KBPS_STABLE</p>
+            <p id="sys-vis-status">> RENDERING_WAVEFORM... [|||||||||||||]</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer
+      class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-8 py-2 bg-[#0E0E0E] dark:bg-[#0E0E0E] h-20 border-t border-[#3B4B37] shadow-[0_-4px_12px_rgba(0,255,65,0.1)]"
+    >
+      <button
+        id="btn-prev"
+        class="flex flex-col items-center justify-center text-[#B9CCB2] opacity-60 hover:opacity-100 hover:text-[#72FF70] transition-all active:scale-90 duration-75"
+      >
+        <span class="material-symbols-outlined" data-icon="skip_previous"
+          >skip_previous</span
+        >
+        <span class="font-['Work_Sans'] font-mono text-[10px] uppercase"
+          >PREV</span
+        >
+      </button>
+      <button
+        id="btn-play"
+        class="flex flex-col items-center justify-center text-[#00FF41] drop-shadow-[0_0_5px_#00E639] hover:scale-110 active:scale-90 duration-75"
+      >
+        <div class="bg-primary-container text-on-primary p-2 mb-1">
+          <span
+            id="play-icon"
+            class="material-symbols-outlined !text-4xl"
+            data-icon="play_arrow"
+            >play_arrow</span
+          >
+        </div>
+        <span class="font-['Work_Sans'] font-mono text-[10px] uppercase"
+          >PLAY</span
+        >
+      </button>
+      <button
+        id="btn-next"
+        class="flex flex-col items-center justify-center text-[#B9CCB2] opacity-60 hover:opacity-100 hover:text-[#72FF70] transition-all active:scale-90 duration-75"
+      >
+        <span class="material-symbols-outlined" data-icon="skip_next"
+          >skip_next</span
+        >
+        <span class="font-['Work_Sans'] font-mono text-[10px] uppercase"
+          >NEXT</span
+        >
+      </button>
+      <button
+        id="btn-lyrics"
+        class="flex flex-col items-center justify-center text-[#B9CCB2] opacity-60 hover:opacity-100 hover:text-[#72FF70] transition-all active:scale-90 duration-75"
+      >
+        <span class="material-symbols-outlined" data-icon="subtitles"
+          >subtitles</span
+        >
+        <span class="font-['Work_Sans'] font-mono text-[10px] uppercase"
+          >LYRICS</span
+        >
+      </button>
+      <button
+        id="btn-shuffle"
+        class="flex flex-col items-center justify-center text-[#B9CCB2] opacity-60 hover:opacity-100 hover:text-[#72FF70] transition-all active:scale-90 duration-75"
+      >
+        <span class="material-symbols-outlined" data-icon="shuffle"
+          >shuffle</span
+        >
+        <span class="font-['Work_Sans'] font-mono text-[10px] uppercase"
+          >SHUFFLE</span
+        >
+      </button>
+
+      <div
+        class="flex flex-col items-center justify-center text-[#B9CCB2] w-24 group"
+      >
+        <span
+          class="material-symbols-outlined text-sm opacity-60 group-hover:opacity-100 transition-opacity"
+          data-icon="volume_up"
+          >volume_up</span
+        >
+        <input
+          id="sys-volume"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value="0.5"
+          class="w-full h-1 bg-surface-container-high appearance-none cursor-pointer accent-primary-container opacity-60 group-hover:opacity-100 transition-opacity mt-1"
+        />
+      </div>
+    </footer>
+
+    <div
+      class="fixed inset-0 crt-overlay opacity-30 pointer-events-none z-[100]"
+    ></div>
+
+    <script>
+      // PARÁMETROS MAESTROS DEL VISUALIZADOR
+      let visParams = {
+        boost: 1.2, // Reactividad a los bajos
+        rotation: 1.0, // Multiplicador de velocidad
+        intensity: 2.5, // Brillo del material
+        noise: 1.8, // Deformación de la malla
+      };
+      // 1. Configuración
+      const CLIENT_ID = "";
+      const REDIRECT_URI = "http://localhost:5500"; // Cambia esto si usas otro puerto o dominio
+      let deviceId = null;
+      let globalPlayer = null;
+      let currentTrackQueue = [];
+
+      // ==========================================
+      // UTILIDADES Y AUTENTICACIÓN (PKCE)
+      // ==========================================
+      function msToMinutesAndSeconds(ms) {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = ((ms % 60000) / 1000).toFixed(0);
+        return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+      }
+
+      function generateRandomString(length) {
+        let text = "";
+        let possible =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        for (let i = 0; i < length; i++) {
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
+      }
+
+      async function generateCodeChallenge(codeVerifier) {
+        const data = new TextEncoder().encode(codeVerifier);
+        const digest = await window.crypto.subtle.digest("SHA-256", data);
+        return btoa(
+          String.fromCharCode.apply(null, [...new Uint8Array(digest)]),
+        )
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/, "");
+      }
+
+      async function authenticateSpotify() {
+        const verifier = generateRandomString(128);
+        localStorage.setItem("code_verifier", verifier);
+        const challenge = await generateCodeChallenge(verifier);
+
+        // Permisos maestros: incluye lectura de historial para el BITSTREAM
+        const scopes =
+          "streaming user-read-email user-read-private user-modify-playback-state user-library-read playlist-read-private playlist-read-collaborative user-read-recently-played";
+
+        // ¡La variable perdida ha regresado!
+        const params = new URLSearchParams();
+        params.append("client_id", CLIENT_ID);
+        params.append("response_type", "code");
+        params.append("redirect_uri", REDIRECT_URI);
+        params.append("scope", scopes);
+        params.append("code_challenge_method", "S256");
+        params.append("code_challenge", challenge);
+
+        // Usamos la URL de autorización oficial de Spotify
+        window.location.href =
+          "https://accounts.sp" + "otify.com/authorize?" + params.toString();
+      }
+
+      async function getAccessToken(code) {
+        const verifier = localStorage.getItem("code_verifier");
+        const params = new URLSearchParams();
+        params.append("client_id", CLIENT_ID);
+        params.append("grant_type", "authorization_code");
+        params.append("code", code);
+        params.append("redirect_uri", REDIRECT_URI);
+        params.append("code_verifier", verifier);
+
+        try {
+          const response = await fetch(
+            "https://accounts.sp" + "otify.com/api/token",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: params,
+            },
+          );
+          const data = await response.json();
+          return data.access_token;
+        } catch (error) {
+          console.error("Error obteniendo el token:", error);
+        }
+      }
+
+      // ==========================================
+      // DECODIFICADOR VOCAL DE EMERGENCIA (Bypass de letras externas)
+      // ==========================================
+      async function updateVocalDataStream(title, artist) {
+        const trackList = document.getElementById("track-list");
+        // Verificamos si estamos en la vista de letras para no sobreescribir otros menús
+        if (!trackList.querySelector('[data-view="lyrics"]')) return;
+
+        trackList.innerHTML = `<h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> EXTRACTING_LYRICS: ${title}</h3><div class="flex justify-center items-center h-32"><p class="animate-pulse text-tertiary-fixed-dim">> BYPASSING_DRM... ESTABLISHING_EXTERNAL_CONNECTION</p></div>`;
+
+        // Limpiamos el título (quitamos cosas como "- Remastered" para que el buscador no se confunda)
+        const cleanTitle = title.split(" - ")[0];
+
+        try {
+          // Interceptamos la API abierta de lyrics.ovh
+          const res = await fetch(
+            `https://api.lyrics.ovh/v1/${artist}/${cleanTitle}`,
+          );
+          const data = await res.json();
+
+          if (data.lyrics) {
+            trackList.innerHTML = `
+                        <div data-view="lyrics">
+                            <h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> VOCAL_DATA_STREAM</h3>
+                            <div class="font-mono text-[11px] text-[#b9ccb2] whitespace-pre-wrap leading-relaxed bg-surface-container-high/20 p-4 border border-outline-variant/30">${data.lyrics}</div>
+                        </div>
+                    `;
+          } else {
+            trackList.innerHTML = `<div data-view="lyrics"><p class="text-outline-variant font-mono text-xs">> ENCRYPTION_TOO_STRONG. LYRICS_NOT_FOUND_IN_DATABASE.</p></div>`;
+          }
+        } catch (err) {
+          trackList.innerHTML = `<div data-view="lyrics"><p class="text-red-500 font-mono text-xs">> CONNECTION_INTERCEPTED. EXTERNAL_SERVER_OFFLINE.</p></div>`;
+        }
+      }
+
+      // ==========================================
+      // REPRODUCTOR WEB SPOTIFY SDK
+      // ==========================================
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        const token = localStorage.getItem("spotify_token");
+        if (!token) return;
+
+        const player = new Spotify.Player({
+          name: "ARCHAEOLOGIST_OS",
+          getOAuthToken: (cb) => {
+            cb(token);
+          },
+          volume: 0.5,
+        });
+        globalPlayer = player;
+
+        // Ciclo de actualización en tiempo real (Texto y Barra)
+        setInterval(() => {
+          if (globalPlayer) {
+            globalPlayer.getCurrentState().then((state) => {
+              if (!state || state.paused) return;
+
+              const currentTime = msToMinutesAndSeconds(state.position);
+              const totalTime = msToMinutesAndSeconds(state.duration);
+              const artistName =
+                state.track_window.current_track.artists[0].name;
+
+              // 1. Actualizar texto
+              document.getElementById("track-artist").innerText =
+                `PHASE: ${artistName} // ${currentTime} / ${totalTime}`;
+
+              // 2. Actualizar ancho de la barra
+              const progressPercent = (state.position / state.duration) * 100;
+              const progressBar = document.getElementById("progress-bar");
+              if (progressBar) progressBar.style.width = `${progressPercent}%`;
+            });
+          }
+        }, 1000);
+
+        player.addListener("player_state_changed", (state) => {
+          if (!state) return;
+
+          const currentTrack = state.track_window.current_track;
+
+          // 1. Actualiza el título y artista abajo a la izquierda
+          document.getElementById("track-title").innerText = currentTrack.name;
+          const artistName = currentTrack.artists[0].name;
+          const currentTime = msToMinutesAndSeconds(state.position);
+          const totalTime = msToMinutesAndSeconds(state.duration);
+          document.getElementById("track-artist").innerText =
+            `PHASE: ${artistName} // ${currentTime} / ${totalTime}`;
+
+          // 2. Actualiza el botón de Play/Pause
+          const playIcon = document.getElementById("play-icon");
+          playIcon.innerText = state.paused ? "play_arrow" : "pause";
+
+          // 3. --- EL SENSOR DE AUTO-ACTUALIZACIÓN ---
+          // Buscamos si el contenedor invisible 'data-view="decode"' existe en la pantalla.
+          // Si existe, recalculamos las barras automáticamente.
+          const trackList = document.getElementById("track-list");
+          if (trackList.querySelector('[data-view="decode"]')) {
+            window.renderDecodeView(currentTrack);
+          }
+          // --- SENSOR DE AUTO-LYRICS ---
+          // Si la vista de letras está activa, forzamos la decodificación de la nueva pista
+          updateVocalDataStream(currentTrack.name, artistName);
+        });
+
+        player.addListener("ready", ({ device_id }) => {
+          console.log("¡SISTEMA DE AUDIO EN LÍNEA! Device ID:", device_id);
+          deviceId = device_id;
+          // Actualizamos la telemetría: Conexión exitosa
+          document.getElementById("sys-buffer-status").innerText =
+            `> DOWNLINK_READY: device_id_${device_id}`;
+          document.getElementById("sys-vis-status").innerText =
+            `> VISUALIZER_SENSORS...Synced`;
+
+          // Botones básicos
+          document.getElementById("btn-prev").onclick = () =>
+            player.previousTrack();
+          document.getElementById("btn-next").onclick = () =>
+            player.nextTrack();
+          document.getElementById("btn-play").onclick = () =>
+            player.togglePlay();
+          // === CONTROL DE VOLUMEN DE HARDWARE ===
+          const volSlider = document.getElementById("sys-volume");
+          if (volSlider) {
+            volSlider.addEventListener("input", (e) => {
+              const newVol = parseFloat(e.target.value);
+              globalPlayer.setVolume(newVol).then(() => {
+                console.log(
+                  `>> SYS_VOLUME_UPDATE: ${Math.round(newVol * 100)}%`,
+                );
+              });
+            });
+          }
+
+          // === BOTÓN SHUFFLE (CONEXIÓN API) ===
+          let isShuffleActive = false;
+          const shuffleBtn = document.getElementById("btn-shuffle");
+          if (shuffleBtn) {
+            shuffleBtn.onclick = async () => {
+              const token = localStorage.getItem("spotify_token");
+              if (!token || !deviceId) return;
+
+              isShuffleActive = !isShuffleActive;
+              try {
+                // Le enviamos la señal de alteración de entropía a Spotify
+                await fetch(
+                  "https://api.sp" +
+                    "otify.com/v1/me/player/shuffle?state=" +
+                    isShuffleActive +
+                    "&device_id=" +
+                    deviceId,
+                  {
+                    method: "PUT",
+                    headers: { Authorization: "Bearer " + token },
+                  },
+                );
+
+                // Retroalimentación visual en la terminal y en el botón
+                console.log(
+                  `>> ENTROPY_MODE (SHUFFLE): ${isShuffleActive ? "ACTIVE" : "OFFLINE"}`,
+                );
+                shuffleBtn.style.color = isShuffleActive ? "#00FF41" : "";
+                shuffleBtn.style.opacity = isShuffleActive ? "1" : "";
+              } catch (err) {
+                console.error(">> ERROR_SHUFFLE_PROTOCOL", err);
+              }
+            };
+          }
+
+          // === EL NUEVO CONTROL DE TIEMPO (SEEK) ===
+          const progressContainer =
+            document.getElementById("progress-container");
+          if (progressContainer) {
+            progressContainer.addEventListener("click", async (e) => {
+              if (!globalPlayer) return;
+              const state = await globalPlayer.getCurrentState();
+              if (!state) return;
+
+              // Matemáticas de posicionamiento
+              const rect = progressContainer.getBoundingClientRect();
+              const clickX = e.clientX - rect.left; // Posición exacta del clic
+              const percentage = clickX / rect.width; // Porcentaje (0.0 a 1.0)
+              const seekTimeMs = Math.floor(percentage * state.duration); // Convertir a milisegundos
+
+              // Le decimos a Spotify que salte a ese punto
+              globalPlayer.seek(seekTimeMs).then(() => {
+                console.log(
+                  `>> TIME_JUMP: ${msToMinutesAndSeconds(seekTimeMs)}`,
+                );
+                // Actualizamos la barra inmediatamente para que se sienta instantáneo
+                document.getElementById("progress-bar").style.width =
+                  `${percentage * 100}%`;
+              });
+            });
+          }
+        });
+
+        player.connect();
+      };
+
+      // ==========================================
+      // FUNCIONES DE CONTROL Y BÚSQUEDA
+      // ==========================================
+      async function playTrackList(index) {
+        const token = localStorage.getItem("spotify_token");
+        if (!token || !deviceId) return;
+        connectMicrophone();
+        await fetch(
+          "https://api.sp" +
+            "otify.com/v1/me/player/play?device_id=" +
+            deviceId,
+          {
+            method: "PUT",
+            body: JSON.stringify({
+              uris: currentTrackQueue,
+              offset: { position: index },
+            }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+          },
+        );
+      }
+
+      async function playContext(contextUri) {
+        const token = localStorage.getItem("spotify_token");
+        if (!token || !deviceId) return;
+        connectMicrophone();
+        await fetch(
+          "https://api.sp" +
+            "otify.com/v1/me/player/play?device_id=" +
+            deviceId,
+          {
+            method: "PUT",
+            body: JSON.stringify({ context_uri: contextUri }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+          },
+        );
+      }
+
+      async function searchTrack(query, token) {
+        try {
+          const response = await fetch(
+            "https://api.sp" +
+              "otify.com/v1/search?q=" +
+              encodeURIComponent(query) +
+              "&type=track&limit=10",
+            { headers: { Authorization: "Bearer " + token } },
+          );
+
+          if (response.status === 401) {
+            localStorage.removeItem("spotify_token");
+            location.reload();
+            return;
+          }
+
+          const data = await response.json();
+          currentTrackQueue = data.tracks.items.map((track) => track.uri);
+          const trackList = document.getElementById("track-list");
+          trackList.innerHTML = "";
+
+          data.tracks.items.forEach((track, index) => {
+            const num = (index + 1).toString().padStart(2, "0");
+            const title = track.name;
+            const artist = track.artists.map((a) => a.name).join(", ");
+            const duration = msToMinutesAndSeconds(track.duration_ms);
+            const albumCover = track.album.images[2].url;
+
+            trackList.innerHTML += `
+                    <div onclick="playTrackList(${index})" class="flex items-center gap-4 p-4 group cursor-pointer hover:bg-surface-container-high transition-colors border border-transparent hover:border-primary-container/20">
+                        <span class="font-mono text-[10px] text-outline-variant">${num}</span>
+                        <img src="${albumCover}" class="w-8 h-8 opacity-80 group-hover:opacity-100 transition-opacity" alt="cover">
+                        <div class="flex-1 overflow-hidden">
+                            <h4 class="font-headline font-bold text-sm text-[#B9CCB2] group-hover:text-primary-container uppercase truncate">${title}</h4>
+                            <p class="font-mono text-[10px] text-outline-variant uppercase truncate">${artist}</p>
+                        </div>
+                        <span class="font-mono text-xs text-outline-variant">${duration}</span>
+                    </div>`;
+          });
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      // ==========================================
+      // NUEVO BOTÓN: MIS PLAYLISTS (ARCHIVE)
+      // ==========================================
+      // ==========================================
+      // EVENTOS DE INTERFAZ Y BOTONES
+      // ==========================================
+      document.addEventListener("DOMContentLoaded", () => {
+        // 1. Botón de Mis Playlists (ARCHIVE)
+        const archiveBtn = document.getElementById("nav-archive");
+        if (archiveBtn) {
+          archiveBtn.onclick = async (e) => {
+            e.preventDefault();
+            console.log(">> Iniciando decodificación de bóveda...");
+
+            const token = localStorage.getItem("spotify_token");
+            if (!token) return;
+
+            const trackList = document.getElementById("track-list");
+            trackList.innerHTML =
+              '<h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> DECODING_USER_VAULT...</h3>';
+
+            try {
+              const res = await fetch(
+                "https://api.sp" + "otify.com/v1/me/playlists?limit=50",
+                {
+                  headers: { Authorization: "Bearer " + token },
+                },
+              );
+
+              const data = await res.json();
+
+              if (data.items && data.items.length > 0) {
+                let finalHTML = `<h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> VAULT_DECODED: ${data.items.length} ITEMS</h3>`;
+
+                data.items.forEach((playlist) => {
+                  if (!playlist) return;
+                  const img =
+                    playlist.images && playlist.images.length > 0
+                      ? playlist.images[0].url
+                      : "https://via.placeholder.com/150/333333/00ff41?text=ARES";
+                  const title = playlist.name || "UNKNOWN_ARCHIVE";
+                  const total =
+                    playlist.tracks && playlist.tracks.total
+                      ? playlist.tracks.total
+                      : 0;
+
+                  finalHTML += `
+                        <div onclick="playContext('${playlist.uri}')" class="flex items-center gap-4 p-4 group cursor-pointer hover:bg-surface-container-high border border-transparent hover:border-primary-container/20 transition-all">
+                            <img src="${img}" class="w-10 h-10 opacity-80 group-hover:opacity-100 object-cover border border-outline-variant/30">
+                            <div class="flex-1 overflow-hidden">
+                                <h4 class="font-headline font-bold text-sm text-[#B9CCB2] group-hover:text-primary-container uppercase truncate">${title}</h4>
+                                <p class="font-mono text-[10px] text-outline-variant uppercase truncate">${total} TRACKS IN ARCHIVE</p>
+                            </div>
+                        </div>`;
+                });
+                trackList.innerHTML = finalHTML;
+              } else {
+                trackList.innerHTML =
+                  '<p class="text-outline-variant font-mono text-xs">> VAULT IS EMPTY OR ACCESS DENIED.</p>';
+              }
+            } catch (err) {
+              console.error(">> Fallo crítico en la bóveda:", err);
+              trackList.innerHTML =
+                '<p class="text-red-500 font-mono text-xs">> ERROR_DECODING_VAULT: CHECK CONSOLE.</p>';
+            }
+          };
+        }
+
+        // 2. BARRA SUPERIOR: QUERY_STREAM (Búsqueda de Álbumes)
+        const queryStreamInput = document.getElementById("query-stream-input");
+        if (queryStreamInput) {
+          queryStreamInput.addEventListener("keypress", async (e) => {
+            if (e.key === "Enter") {
+              const query = e.target.value;
+              const token = localStorage.getItem("spotify_token");
+              if (!query || !token) return;
+
+              const trackList = document.getElementById("track-list");
+              trackList.innerHTML =
+                '<h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> SEARCHING_GLOBAL_DATABASE...</h3>';
+
+              try {
+                const res = await fetch(
+                  "https://api.sp" +
+                    "otify.com/v1/search?q=" +
+                    encodeURIComponent(query) +
+                    "&type=album&limit=10",
+                  {
+                    headers: { Authorization: "Bearer " + token },
+                  },
+                );
+
+                const data = await res.json();
+                let finalHTML = `<h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> ALBUMS_FOUND: ${data.albums.items.length}</h3>`;
+
+                data.albums.items.forEach((album) => {
+                  const img =
+                    album.images && album.images.length > 0
+                      ? album.images[2].url
+                      : "";
+                  const title = album.name;
+                  const artist = album.artists.map((a) => a.name).join(", ");
+                  const year = album.release_date.substring(0, 4);
+
+                  finalHTML += `
+                        <div onclick="playContext('${album.uri}')" class="flex items-center gap-4 p-4 group cursor-pointer hover:bg-surface-container-high transition-colors border border-transparent hover:border-primary-container/20">
+                            <img src="${img}" class="w-8 h-8 opacity-80 group-hover:opacity-100 transition-opacity" alt="cover">
+                            <div class="flex-1 overflow-hidden">
+                                <h4 class="font-headline font-bold text-sm text-[#B9CCB2] group-hover:text-primary-container uppercase truncate">${title}</h4>
+                                <p class="font-mono text-[10px] text-outline-variant uppercase truncate">${artist} // [${year}]</p>
+                            </div>
+                            <span class="font-mono text-[10px] text-outline-variant uppercase">ALBUM</span>
+                        </div>`;
+                });
+
+                trackList.innerHTML = finalHTML;
+              } catch (error) {
+                console.error("Error en QUERY_STREAM:", error);
+              }
+            }
+          });
+        }
+
+        // 3. Botón de LOGOUT
+        const logoutBtn = document.getElementById("logout-container");
+        if (logoutBtn) {
+          logoutBtn.onclick = () => {
+            localStorage.clear();
+            location.reload();
+          };
+        }
+
+        // 4. Barra de Búsqueda de Canciones (Filtro lateral)
+        const searchInput = document.getElementById("search-input");
+        if (searchInput) {
+          searchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+              const query = e.target.value;
+              const token = localStorage.getItem("spotify_token");
+              if (query && token) {
+                searchTrack(query, token);
+              }
+            }
+          });
+        }
+        // ==========================================
+        // 5. BOTÓN VAULT (Canciones que te gustan / Liked Songs)
+        // ==========================================
+        // ==========================================
+        // 5. BOTÓN VAULT (Extracción Masiva - Paginación)
+        // ==========================================
+        const vaultBtn = document.getElementById("nav-vault");
+        if (vaultBtn) {
+          vaultBtn.onclick = async (e) => {
+            e.preventDefault();
+            window.setMenuActive("nav-vault");
+            console.log(">> Iniciando extracción masiva de VAULT...");
+
+            const token = localStorage.getItem("spotify_token");
+            if (!token) return;
+
+            const trackList = document.getElementById("track-list");
+            trackList.innerHTML =
+              '<h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> DOWNLOADING_FULL_VAULT...</h3>';
+
+            try {
+              let allItems = [];
+              // Empezamos pidiendo las primeras 50
+              let url = "https://api.sp" + "otify.com/v1/me/tracks?limit=50";
+              // BUCLE: Mientras Spotify nos siga dando una URL para la "siguiente página"
+              while (url) {
+                const res = await fetch(url, {
+                  headers: { Authorization: "Bearer " + token },
+                });
+
+                if (res.status === 401) {
+                  localStorage.removeItem("spotify_token");
+                  location.reload();
+                  return;
+                }
+
+                const data = await res.json();
+
+                if (data.items) {
+                  allItems = allItems.concat(data.items); // Juntamos las nuevas 50 con las que ya teníamos
+                }
+
+                // Actualizamos la interfaz para que parezca que estamos hackeando la base de datos
+                trackList.innerHTML = `<h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> EXTRACTING_DATA: ${allItems.length} FILES FOUND...</h3>`;
+
+                url = data.next; // Spotify nos da el link de las siguientes 50. Si ya no hay, será "null" y el bucle termina.
+
+                // SEGURO DE MEMORIA: Rompemos el bucle si llegamos a 500 canciones para no congelar la pestaña.
+                // Si tu compu es potente, puedes borrar esta línea o subir el número a 1000.
+                if (allItems.length >= 500) break;
+              }
+
+              if (allItems.length > 0) {
+                currentTrackQueue = allItems.map((item) => item.track.uri);
+
+                let finalHTML = `<h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> VAULT_OPENED: ${allItems.length} SAVED TRACKS</h3>`;
+
+                allItems.forEach((item, index) => {
+                  const track = item.track;
+                  if (!track) return;
+
+                  // Aumenté el padStart a 3 para que los números lleguen hasta el 999 sin descuadrarse
+                  const num = (index + 1).toString().padStart(3, "0");
+                  const title = track.name;
+                  const artist = track.artists.map((a) => a.name).join(", ");
+                  const duration = msToMinutesAndSeconds(track.duration_ms);
+                  const albumCover =
+                    track.album.images && track.album.images.length > 0
+                      ? track.album.images[2].url
+                      : "https://via.placeholder.com/50/131313/00ff41?text=V";
+
+                  finalHTML += `
+                        <div onclick="playTrackList(${index})" class="flex items-center gap-4 p-4 group cursor-pointer hover:bg-surface-container-high transition-colors border border-transparent hover:border-primary-container/20">
+                            <span class="font-mono text-[10px] text-outline-variant">${num}</span>
+                            <img src="${albumCover}" class="w-8 h-8 opacity-80 group-hover:opacity-100 transition-opacity" alt="cover">
+                            <div class="flex-1 overflow-hidden">
+                                <h4 class="font-headline font-bold text-sm text-[#B9CCB2] group-hover:text-primary-container uppercase truncate">${title}</h4>
+                                <p class="font-mono text-[10px] text-outline-variant uppercase truncate">${artist}</p>
+                            </div>
+                            <span class="font-mono text-xs text-outline-variant">${duration}</span>
+                        </div>`;
+                });
+
+                trackList.innerHTML = finalHTML;
+                console.log(
+                  `>> VAULT cargado al máximo. Total: ${allItems.length}`,
+                );
+              } else {
+                trackList.innerHTML =
+                  '<p class="text-outline-variant font-mono text-xs">> VAULT IS EMPTY.</p>';
+              }
+            } catch (error) {
+              console.error(">> Error al abrir el VAULT:", error);
+              trackList.innerHTML =
+                '<p class="text-red-500 font-mono text-xs">> ERROR_OPENING_VAULT: CHECK CONSOLE.</p>';
+            }
+          };
+          // ==========================================
+          // 6. CONSOLA DE TERMINAL INTERACTIVA
+          // ==========================================
+          const terminalBtnSidebar = document.getElementById("nav-terminal");
+          const terminalBtnTop = document.getElementById("terminal-btn"); // El ícono de arriba
+
+          function openTerminal(e) {
+            if (e) e.preventDefault();
+            window.setMenuActive("nav-terminal");
+            const trackList = document.getElementById("track-list");
+
+            // Dibujamos la interfaz de la consola
+            trackList.innerHTML = `
+            <div class="h-full flex flex-col bg-[#050505] p-4 font-mono text-[#00ff41] text-xs beveled-inset overflow-hidden border border-[#3b4b37]">
+                <div id="terminal-output" class="flex-1 overflow-y-auto custom-scrollbar whitespace-pre-wrap mb-2">
+> ARCHAEOLOGIST_OS TERMINAL v4.2.0
+> KERNEL INITIALIZED.
+> TYPE 'help' FOR A LIST OF AVAILABLE COMMANDS.
+-------------------------------------------------</div>
+                <div class="flex items-center gap-2 mt-2 border-t border-[#00ff41]/30 pt-2">
+                    <span class="text-[#00ff41]">>_</span>
+                    <input id="terminal-input" type="text" class="flex-1 bg-transparent border-none text-[#00ff41] focus:ring-0 p-0 text-xs outline-none" autocomplete="off" spellcheck="false" autofocus placeholder="AWAITING_COMMAND...">
+                </div>
+            </div>
+        `;
+
+            const termInput = document.getElementById("terminal-input");
+            const termOutput = document.getElementById("terminal-output");
+
+            // Escuchamos cuando el operador presiona Enter
+            termInput.addEventListener("keypress", (event) => {
+              if (event.key === "Enter") {
+                const cmd = termInput.value.trim().toLowerCase();
+                termInput.value = "";
+                if (!cmd) return;
+
+                // Imprimimos el comando que escribió el usuario
+                termOutput.innerHTML += `\n\n<span class="text-[#b9ccb2]">>_ ${cmd}</span>`;
+
+                // Procesamos el comando
+                processCommand(cmd, termOutput);
+
+                // Hacemos scroll automático hacia abajo
+                termOutput.scrollTop = termOutput.scrollHeight;
+              }
+            });
+          }
+
+          // El "Cerebro" de la consola
+          function processCommand(cmd, outputEl) {
+            const args = cmd.split(" ");
+            const mainCmd = args[0];
+
+            switch (mainCmd) {
+              case "help":
+                outputEl.innerHTML += `\n  AVAILABLE COMMANDS:
+  help    - MUESTRA ESTE MENSAJE
+  play    - REANUDA LA REPRODUCCIÓN
+  pause   - PAUSA LA REPRODUCCIÓN
+  next    - SALTA A LA SIGUIENTE CANCIÓN
+  prev    - REGRESA A LA CANCIÓN ANTERIOR
+  clear   - LIMPIA LA PANTALLA
+  color   - CAMBIA EL TEMA DEL SISTEMA
+  status  - MUESTRA EL ESTADO DEL HARDWARE`;
+                break;
+              case "play":
+                if (globalPlayer) {
+                  globalPlayer.togglePlay();
+                  outputEl.innerHTML += `\n  [OK] PLAYBACK TOGGLED.`;
+                } else {
+                  outputEl.innerHTML += `\n  [ERR] AUDIO SYSTEM OFFLINE.`;
+                }
+                break;
+              case "pause":
+                if (globalPlayer) {
+                  globalPlayer.pause();
+                  outputEl.innerHTML += `\n  [OK] PLAYBACK PAUSED.`;
+                } else {
+                  outputEl.innerHTML += `\n  [ERR] AUDIO SYSTEM OFFLINE.`;
+                }
+                break;
+              case "next":
+                if (globalPlayer) {
+                  globalPlayer.nextTrack();
+                  outputEl.innerHTML += `\n  [OK] SKIPPING TO NEXT TRACK.`;
+                } else {
+                  outputEl.innerHTML += `\n  [ERR] AUDIO SYSTEM OFFLINE.`;
+                }
+                break;
+              case "prev":
+                if (globalPlayer) {
+                  globalPlayer.previousTrack();
+                  outputEl.innerHTML += `\n  [OK] RETURNING TO PREVIOUS TRACK.`;
+                } else {
+                  outputEl.innerHTML += `\n  [ERR] AUDIO SYSTEM OFFLINE.`;
+                }
+                break;
+              case "clear":
+                outputEl.innerHTML = `> ARCHAEOLOGIST_OS TERMINAL v4.2.0\n> TYPE 'help' FOR A LIST OF AVAILABLE COMMANDS.\n-------------------------------------------------`;
+                break;
+              case "color":
+                const settingsBtn = document.getElementById("settings-btn");
+                if (settingsBtn) {
+                  settingsBtn.click();
+                  outputEl.innerHTML += `\n  [OK] COLOR THEME CYCLED.`;
+                }
+                break;
+              case "status":
+                outputEl.innerHTML += `\n  [SYS] ALL MODULES OPERATIONAL.\n  [MIC] ${isMicConnected ? "CONNECTED & SYNCED" : "STANDBY"}\n  [MEM] ALLOCATED\n  [NET] STABLE`;
+                break;
+              case "mixiote":
+                outputEl.innerHTML += `\n  [EASTER_EGG] ACTIVANDO MODO HACKATHON. ¡AGUANTE EL MIXIOTE TEAM! 🚀`;
+                break;
+              default:
+                outputEl.innerHTML += `\n  [ERR] COMMAND NOT RECOGNIZED: '${mainCmd}'. TYPE 'help' FOR COMMANDS.`;
+            }
+          }
+        }
+
+        // Conectamos ambos botones (el de la izquierda y el ícono de arriba)
+        const termSidebar = document.getElementById("nav-terminal");
+        const termTop = document.getElementById("terminal-btn");
+        if (termSidebar) termSidebar.addEventListener("click", openTerminal);
+        if (termTop) termTop.addEventListener("click", openTerminal);
+
+        // ==========================================
+        // 7. BOTÓN DECODE (Metadatos y Análisis en Tiempo Real)
+        // ==========================================
+        window.renderDecodeView = function (currentTrack) {
+          const trackList = document.getElementById("track-list");
+          const trackId = currentTrack.id;
+
+          // ALGORITMO DE HASH DETERMINISTA
+          let hash = 0;
+          for (let i = 0; i < trackId.length; i++) {
+            hash = trackId.charCodeAt(i) + ((hash << 5) - hash);
+          }
+          const seed = Math.abs(hash);
+
+          const features = {
+            tempo: 80 + (seed % 80),
+            key: seed % 12,
+            mode: seed % 2,
+            time_signature: 4,
+            loudness: -((seed % 10) + 4).toFixed(1),
+            danceability: (seed % 100) / 100,
+            energy: ((seed >> 1) % 100) / 100,
+            acousticness: ((seed >> 2) % 100) / 100,
+            valence: ((seed >> 3) % 100) / 100,
+          };
+
+          const pitchClasses = [
+            "C",
+            "C#",
+            "D",
+            "D#",
+            "E",
+            "F",
+            "F#",
+            "G",
+            "G#",
+            "A",
+            "A#",
+            "B",
+          ];
+          const keyName = pitchClasses[features.key];
+          const modeName = features.mode === 1 ? "MAJOR" : "MINOR";
+
+          // El atributo especial 'data-view="decode"' nos ayudará a saber si estamos en esta pantalla
+          trackList.innerHTML = `
+            <div data-view="decode" class="w-full">
+                <h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> TRACK_DECODED: ${currentTrack.name.toUpperCase()}</h3>
+                <div class="space-y-4 font-mono text-xs text-[#b9ccb2]">
+                    <div class="border border-outline-variant/30 p-3 bg-surface-container-high/20">
+                        <p class="text-primary-container mb-2">> CORE_SIGNATURE:</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <p>BPM_TEMPO: <span class="text-white">${features.tempo}</span></p>
+                            <p>KEY_TONE: <span class="text-white">${keyName} ${modeName}</span></p>
+                            <p>TIME_SIG: <span class="text-white">${features.time_signature}/4</span></p>
+                            <p>LOUDNESS: <span class="text-white">${features.loudness} dB</span></p>
+                        </div>
+                    </div>
+
+                    <div class="border border-outline-variant/30 p-3 bg-surface-container-high/20">
+                        <p class="text-primary-container mb-2">> PSYCHOACOUSTIC_METRICS:</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span>DANCEABILITY</span>
+                                <div class="w-1/2 h-1 bg-surface-container-high relative">
+                                    <div class="absolute top-0 left-0 h-full bg-[#00daf3] transition-all duration-500" style="width: ${features.danceability * 100}%"></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span>ENERGY</span>
+                                <div class="w-1/2 h-1 bg-surface-container-high relative">
+                                    <div class="absolute top-0 left-0 h-full bg-[#ff003c] transition-all duration-500" style="width: ${features.energy * 100}%"></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span>ACOUSTICNESS</span>
+                                <div class="w-1/2 h-1 bg-surface-container-high relative">
+                                    <div class="absolute top-0 left-0 h-full bg-[#ffb000] transition-all duration-500" style="width: ${features.acousticness * 100}%"></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span>VALENCE (MOOD)</span>
+                                <div class="w-1/2 h-1 bg-surface-container-high relative">
+                                    <div class="absolute top-0 left-0 h-full bg-[#00ff41] transition-all duration-500" style="width: ${features.valence * 100}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border border-outline-variant/30 p-3 bg-surface-container-high/20 text-[10px] text-outline-variant opacity-70">
+                        <p>> RAW_TRACK_ID: ${trackId}</p>
+                        <p>> DECRYPTION_TIMESTAMP: ${new Date().toISOString()}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        };
+
+        const decodeBtn = document.getElementById("nav-decode");
+        if (decodeBtn) {
+          decodeBtn.onclick = async (e) => {
+            e.preventDefault();
+            if (!globalPlayer) return;
+            const state = await globalPlayer.getCurrentState();
+            if (!state || !state.track_window.current_track) {
+              document.getElementById("track-list").innerHTML =
+                '<p class="text-outline-variant font-mono text-xs">> NO_ACTIVE_STREAM_DETECTED.</p>';
+              return;
+            }
+            window.renderDecodeView(state.track_window.current_track);
+          };
+        }
+        // ==========================================
+        // 8. BOTÓN FREQUENCY (Panel de Control 3D)
+        // ==========================================
+        const freqBtn = document.getElementById("nav-frequency");
+        if (freqBtn) {
+          freqBtn.onclick = (e) => {
+            e.preventDefault();
+            window.setMenuActive("nav-frequency");
+            const trackList = document.getElementById("track-list");
+
+            trackList.innerHTML = `
+                <h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> FREQUENCY_MODULATOR_v1.0</h3>
+                <div class="space-y-6 font-mono text-xs text-[#b9ccb2] bg-surface-container-high/10 p-4 border border-outline-variant/20">
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between"><span>SIGNAL_BOOST (BASS)</span><span id="val-boost">${visParams.boost}x</span></div>
+                        <input type="range" min="0.5" max="3" step="0.1" value="${visParams.boost}" 
+                            class="w-full h-1 bg-surface-container-high appearance-none cursor-pointer accent-primary-container"
+                            oninput="visParams.boost = parseFloat(this.value); document.getElementById('val-boost').innerText = this.value + 'x'">
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between"><span>ROTATION_GEAR</span><span id="val-rot">${visParams.rotation}x</span></div>
+                        <input type="range" min="0" max="5" step="0.5" value="${visParams.rotation}" 
+                            class="w-full h-1 bg-surface-container-high appearance-none cursor-pointer accent-tertiary-fixed-dim"
+                            oninput="visParams.rotation = parseFloat(this.value); document.getElementById('val-rot').innerText = this.value + 'x'">
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between"><span>EMISSIVE_INTENSITY</span><span id="val-int">${visParams.intensity}</span></div>
+                        <input type="range" min="0" max="10" step="1" value="${visParams.intensity}" 
+                            class="w-full h-1 bg-surface-container-high appearance-none cursor-pointer accent-primary-container"
+                            oninput="visParams.intensity = parseFloat(this.value); document.getElementById('val-int').innerText = this.value">
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between"><span>NOISE_DEVIATION</span><span id="val-noise">${visParams.noise}</span></div>
+                        <input type="range" min="1" max="5" step="0.2" value="${visParams.noise}" 
+                            class="w-full h-1 bg-surface-container-high appearance-none cursor-pointer accent-white"
+                            oninput="visParams.noise = parseFloat(this.value); document.getElementById('val-noise').innerText = this.value">
+                    </div>
+
+                </div>
+                <p class="mt-4 font-mono text-[9px] text-outline-variant uppercase">> AJUSTES DE HARDWARE SINCRONIZADOS EN TIEMPO REAL.</p>
+            `;
+          };
+        }
+        // ==========================================
+        // 9. BOTÓN BITSTREAM (Historial de Reproducción)
+        // ==========================================
+        const bitstreamBtn = document.getElementById("nav-bitstream");
+        if (bitstreamBtn) {
+          bitstreamBtn.onclick = async (e) => {
+            e.preventDefault();
+            window.setMenuActive("nav-bitstream");
+            console.log(">> Accediendo a BITSTREAM (Historial)...");
+
+            const token = localStorage.getItem("spotify_token");
+            if (!token) return;
+
+            const trackList = document.getElementById("track-list");
+            trackList.innerHTML =
+              '<h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> QUERYING_TEMPORAL_LOGS...</h3>';
+
+            try {
+              // Petición al endpoint de "Recently Played" de Spotify
+              const res = await fetch(
+                "https://api.sp" +
+                  "otify.com/v1/me/player/recently-played?limit=30",
+                { headers: { Authorization: "Bearer " + token } },
+              );
+
+              if (res.status === 401) {
+                localStorage.removeItem("spotify_token");
+                location.reload();
+                return;
+              }
+
+              const data = await res.json();
+
+              if (data.items && data.items.length > 0) {
+                // Sincronizamos la cola por si quieres volver a escuchar tu historial
+                currentTrackQueue = data.items.map((item) => item.track.uri);
+
+                let finalHTML = `<h3 class="font-mono text-primary-container mb-4 text-xs tracking-widest uppercase">> BITSTREAM_LOGS: ${data.items.length} RECENT CONNECTIONS</h3>`;
+
+                data.items.forEach((item, index) => {
+                  const track = item.track;
+                  if (!track) return;
+
+                  const title = track.name;
+                  const artist = track.artists.map((a) => a.name).join(", ");
+                  const duration = msToMinutesAndSeconds(track.duration_ms);
+                  const albumCover =
+                    track.album.images && track.album.images.length > 0
+                      ? track.album.images[2].url
+                      : "https://via.placeholder.com/50/131313/00ff41?text=B";
+
+                  // Extraemos y formateamos la fecha/hora en la que escuchaste la canción
+                  const playedDate = new Date(item.played_at);
+                  const timeLog = playedDate.toLocaleTimeString("es-MX", {
+                    hour12: false,
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  const dateLog = playedDate.toLocaleDateString("es-MX", {
+                    day: "2-digit",
+                    month: "2-digit",
+                  });
+
+                  finalHTML += `
+                        <div onclick="playTrackList(${index})" class="flex items-center gap-4 p-4 group cursor-pointer hover:bg-surface-container-high transition-colors border border-transparent hover:border-primary-container/20">
+                            <div class="flex flex-col items-end justify-center w-12 border-r border-outline-variant/30 pr-3 opacity-80">
+                                <span class="font-mono text-[10px] text-tertiary-fixed-dim">${timeLog}</span>
+                                <span class="font-mono text-[8px] text-outline-variant">${dateLog}</span>
+                            </div>
+                            <img src="${albumCover}" class="w-8 h-8 opacity-80 group-hover:opacity-100 transition-opacity" alt="cover">
+                            <div class="flex-1 overflow-hidden">
+                                <h4 class="font-headline font-bold text-sm text-[#B9CCB2] group-hover:text-primary-container uppercase truncate">${title}</h4>
+                                <p class="font-mono text-[10px] text-outline-variant uppercase truncate">${artist}</p>
+                            </div>
+                            <span class="font-mono text-xs text-outline-variant">${duration}</span>
+                        </div>`;
+                });
+
+                trackList.innerHTML = finalHTML;
+              } else {
+                trackList.innerHTML =
+                  '<p class="text-outline-variant font-mono text-xs">> NO_TEMPORAL_LOGS_FOUND.</p>';
+              }
+            } catch (error) {
+              console.error(">> Error en BITSTREAM:", error);
+              trackList.innerHTML =
+                '<p class="text-red-500 font-mono text-xs">> ERROR_READING_LOGS: CHECK CONSOLE.</p>';
+            }
+          };
+        }
+        // ==========================================
+        // 10. MODO CINEMÁTICO (Esconder menús fluido)
+        // ==========================================
+        const systemBtn = document.getElementById("nav-system");
+        const asideElem = document.querySelector("aside");
+        const rightPanel = document.querySelector("main section:nth-child(2)");
+
+        if (systemBtn && asideElem && rightPanel) {
+          // Inyectamos CSS puro para controlar las curvas de aceleración (cubic-bezier)
+          asideElem.style.transition =
+            "margin-left 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
+          rightPanel.style.transition =
+            "margin-right 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
+
+          let isHudActive = true;
+          systemBtn.onclick = (e) => {
+            e.preventDefault();
+            isHudActive = !isHudActive;
+
+            if (!isHudActive) {
+              // Escondemos los menús empujándolos fuera de la pantalla
+              asideElem.style.marginLeft = `-${asideElem.offsetWidth}px`;
+              rightPanel.style.marginRight = `-${rightPanel.offsetWidth}px`;
+              systemBtn.innerText = "HUD: OFF";
+              systemBtn.classList.replace("text-[#00FF41]", "text-[#ff003c]");
+              systemBtn.classList.replace(
+                "border-[#00FF41]",
+                "border-[#ff003c]",
+              );
+            } else {
+              // Los traemos de vuelta a la posición cero
+              asideElem.style.marginLeft = "0px";
+              rightPanel.style.marginRight = "0px";
+              systemBtn.innerText = "SYSTEM";
+              systemBtn.classList.replace("text-[#ff003c]", "text-[#00FF41]");
+              systemBtn.classList.replace(
+                "border-[#ff003c]",
+                "border-[#00FF41]",
+              );
+            }
+
+            // Le damos 500ms a la animación para terminar y le avisamos al motor 3D que recacule su tamaño
+            setTimeout(() => window.dispatchEvent(new Event("resize")), 500);
+          };
+        }
+
+        // ==========================================
+        // 13. ESTADO DINÁMICO DEL MENÚ LATERAL
+        // ==========================================
+        // Esta función recibe el ID del botón que clickeaste y le pasa la "energía" verde
+        window.setMenuActive = function (clickedId) {
+          const menuIds = [
+            "nav-collection",
+            "nav-frequency",
+            "nav-bitstream",
+            "nav-vault",
+            "nav-terminal",
+          ];
+
+          menuIds.forEach((id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            if (id === clickedId) {
+              // ACTIVAR: Lo ponemos verde y con texto oscuro
+              el.classList.remove("text-[#B9CCB2]", "hover:bg-[#3A3939]");
+              el.classList.add("bg-[#00FF41]", "text-[#003907]", "font-bold");
+            } else {
+              // DESACTIVAR: Lo devolvemos a gris
+              el.classList.remove(
+                "bg-[#00FF41]",
+                "text-[#003907]",
+                "font-bold",
+              );
+              el.classList.add("text-[#B9CCB2]", "hover:bg-[#3A3939]");
+            }
+          });
+        };
+
+        // ==========================================
+        // 14. MOTOR DE LA PESTAÑA DEL PANEL DERECHO
+        // ==========================================
+        const rightPanelSection = document.getElementById("right-panel");
+        const togglePanelBtn = document.getElementById("btn-toggle-panel");
+        const toggleChevron = document.getElementById("toggle-chevron");
+
+        let isPanelHidden = false;
+        if (togglePanelBtn && rightPanelSection) {
+          // INYECTAMOS EL MOTOR DE ANIMACIÓN AQUÍ PARA QUE NUNCA FALLE
+          rightPanelSection.style.transition =
+            "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
+
+          togglePanelBtn.onclick = () => {
+            isPanelHidden = !isPanelHidden;
+            if (isPanelHidden) {
+              // Escondemos el panel moviéndolo 100% a la derecha
+              rightPanelSection.style.transform = "translateX(100%)";
+              toggleChevron.style.transform = "rotate(180deg)";
+            } else {
+              // Lo regresamos a su lugar original
+              rightPanelSection.style.transform = "translateX(0)";
+              toggleChevron.style.transform = "rotate(0deg)";
+            }
+            // Le decimos al motor 3D que recalcule el tamaño de la pantalla
+            setTimeout(() => window.dispatchEvent(new Event("resize")), 500);
+          };
+        }
+
+        // ==========================================
+        // 15. BOTÓN COLLECTION (Restaurar Vista Principal)
+        // ==========================================
+        const collectionBtn = document.getElementById("nav-collection");
+        if (collectionBtn) {
+          collectionBtn.onclick = (e) => {
+            e.preventDefault();
+            window.setMenuActive("nav-collection");
+
+            const trackList = document.getElementById("track-list");
+            trackList.innerHTML = `
+                <div class="text-center p-8 text-outline-variant font-mono text-xs">
+                    <p>> SYSTEM_READY</p>
+                    <p>> AWAITING SEARCH QUERY OR ARCHIVE EXTRACTION...</p>
+                </div>
+            `;
+          };
+        }
+        // === BOTÓN LYRICS (Activar Búsqueda Inicial) ===
+        const lyricsBtn = document.getElementById("btn-lyrics");
+        if (lyricsBtn) {
+          lyricsBtn.onclick = async (e) => {
+            e.preventDefault();
+            if (!globalPlayer) return;
+
+            const state = await globalPlayer.getCurrentState();
+            if (!state || !state.track_window.current_track) return;
+
+            const track = state.track_window.current_track;
+            // Preparamos la interfaz para recibir las letras
+            document.getElementById("track-list").innerHTML =
+              `<div data-view="lyrics"></div>`;
+            // Iniciamos la decodificación
+            updateVocalDataStream(track.name, track.artists[0].name);
+          };
+        }
+      }); // <-- Este es el cierre del DOMContentLoaded
+      window.onload = async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get("code");
+
+        if (code) {
+          let accessToken = await getAccessToken(code);
+          if (accessToken) {
+            console.log("SISTEMA EN LÍNEA: Conexión establecida.");
+            localStorage.setItem("spotify_token", accessToken);
+            window.history.pushState(
+              "",
+              document.title,
+              window.location.pathname,
+            );
+            searchTrack("Daft Punk", accessToken);
+          }
+        } else if (localStorage.getItem("spotify_token")) {
+          console.log("SISTEMA EN LÍNEA (Sesión recuperada).");
+          searchTrack("Daft Punk", localStorage.getItem("spotify_token"));
+        } else {
+          console.log("SISTEMA FUERA DE LÍNEA: Esperando autenticación.");
+          const loginBtn = document.getElementById("auth-btn");
+          if (loginBtn) {
+            loginBtn.addEventListener("click", authenticateSpotify);
+            loginBtn.innerText = "CONNECT_SPOTIFY";
+          }
+        }
+      };
+
+      // ==========================================
+      // MOTOR VISUAL 3D Y AUDIO (THREE.JS)
+      // ==========================================
+      const container = document.getElementById("ferrofluid-container");
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        container.clientWidth / container.clientHeight,
+        0.1,
+        1000,
+      );
+      const renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+      });
+
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      container.appendChild(renderer.domElement);
+
+      const geometry = new THREE.SphereGeometry(2, 64, 64);
+      geometry.userData.originalPositions =
+        geometry.attributes.position.clone();
+
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x050505,
+        roughness: 0.1,
+        metalness: 0.9,
+        emissive: 0x001100,
+      });
+      const ferrofluid = new THREE.Mesh(geometry, material);
+      scene.add(ferrofluid);
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      scene.add(ambientLight);
+
+      const pointLight = new THREE.PointLight(0x00ff41, 3);
+      pointLight.position.set(5, 5, 5);
+      scene.add(pointLight);
+
+      const pointLight2 = new THREE.PointLight(0x00daf3, 2);
+      pointLight2.position.set(-5, -5, 2);
+      scene.add(pointLight2);
+
+      camera.position.z = 5;
+
+      let audioAnalyser;
+      let audioDataArray;
+      let isMicConnected = false;
+
+      async function connectMicrophone() {
+        if (isMicConnected) return;
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          const audioCtx = new (
+            window.AudioContext || window.webkitAudioContext
+          )();
+          const source = audioCtx.createMediaStreamSource(stream);
+
+          audioAnalyser = audioCtx.createAnalyser();
+          audioAnalyser.fftSize = 64;
+          source.connect(audioAnalyser);
+
+          audioDataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+          isMicConnected = true;
+          console.log("🎤 MICRÓFONO EN LÍNEA: Ferrofluido sincronizado.");
+        } catch (error) {
+          console.error("El operador denegó el acceso al micrófono.", error);
+        }
+      }
+
+      // ==========================================
+      // SISTEMA DE AJUSTES: CICLO DE TEMAS VISUALES
+      // ==========================================
+      const settingsBtn = document.getElementById("settings-btn");
+      const themes = [
+        { main: 0x00ff41, sub: 0x00daf3, emissive: 0x001100 }, // Matrix Green (Default)
+        { main: 0xffb000, sub: 0xff5200, emissive: 0x221100 }, // Retro Amber
+        { main: 0x00ffff, sub: 0xff00ff, emissive: 0x001122 }, // Cyberpunk Neon
+        { main: 0xff003c, sub: 0x550000, emissive: 0x220000 }, // Alert Red
+      ];
+      let currentThemeIndex = 0;
+
+      if (settingsBtn) {
+        settingsBtn.addEventListener("click", () => {
+          currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+          const newTheme = themes[currentThemeIndex];
+
+          // Actualizamos las luces y el brillo interno del ferrofluido
+          pointLight.color.setHex(newTheme.main);
+          pointLight2.color.setHex(newTheme.sub);
+          material.emissive.setHex(newTheme.emissive);
+
+          console.log(`> SYS_THEME_UPDATED: INDEX [${currentThemeIndex}]`);
+        });
+      }
+
+      function animateVisualizer() {
+        requestAnimationFrame(animateVisualizer);
+        const time = Date.now() * 0.001;
+
+        // Rotación controlada por el panel FREQUENCY
+        ferrofluid.rotation.x += 0.002 * visParams.rotation;
+        ferrofluid.rotation.y += 0.003 * visParams.rotation;
+
+        // --- NUEVO: ÓRBITA DE LAS LUCES RECTIFICADA ---
+        // Usamos trigonometría para que la luz verde gire alrededor del eje vertical (Y)
+        pointLight.position.x = 5 * Math.sin(time * 0.7);
+        pointLight.position.z = 5 * Math.cos(time * 0.7);
+        pointLight.position.y = 2 + Math.sin(time * 0.3) * 2; // Oscilación suave vertical
+
+        // La luz cyan (azul) hace una órbita diferente para cruzar los brillos
+        pointLight2.position.x = 4 * Math.cos(time * 0.5);
+        pointLight2.position.y = 4 * Math.sin(time * 0.5);
+        // ----------------------------------------------
+
+        let reactividad = 0;
+        if (isMicConnected && audioAnalyser) {
+          audioAnalyser.getByteFrequencyData(audioDataArray);
+          const graves =
+            (audioDataArray[0] +
+              audioDataArray[1] +
+              audioDataArray[2] +
+              audioDataArray[3]) /
+            4;
+          reactividad = (graves / 150) * visParams.boost;
+        }
+
+        // Brillo emisivo controlado por la reactividad y el panel FREQUENCY
+        material.emissiveIntensity = reactividad * visParams.intensity;
+
+        const positions = ferrofluid.geometry.attributes.position;
+        const original = ferrofluid.geometry.userData.originalPositions;
+
+        for (let i = 0; i < positions.count; i++) {
+          const vx = original.getX(i);
+          const vy = original.getY(i);
+          const vz = original.getZ(i);
+          const nx = vx / 2;
+          const ny = vy / 2;
+          const nz = vz / 2;
+          const ruido =
+            Math.sin(time * 6 + vx * 3) *
+            Math.cos(time * 7 + vy * 3) *
+            Math.sin(time * 5 + vz * 3);
+          const desplazamiento =
+            ruido * visParams.noise * reactividad + reactividad * 1.5;
+          positions.setXYZ(
+            i,
+            vx + nx * desplazamiento,
+            vy + ny * desplazamiento,
+            vz + nz * desplazamiento,
+          );
+        }
+
+        positions.needsUpdate = true;
+        ferrofluid.geometry.computeVertexNormals();
+
+        renderer.render(scene, camera);
+      }
+
+      animateVisualizer(); // ← iniciar el loop de render
+
+      window.addEventListener("resize", () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+      // ==========================================
+      // 12. HARDWARE INTERRUPTS (Atajos de Teclado)
+      // ==========================================
+      document.addEventListener("keydown", (e) => {
+        // SEGURO DE SOFTWARE: Ignorar si el operador está tecleando en un input o textarea
+        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
+          return;
+
+        switch (e.code) {
+          case "Space":
+            e.preventDefault(); // Evita que la página haga scroll hacia abajo
+            if (globalPlayer) globalPlayer.togglePlay();
+            console.log(">> HARDWARE_INTERRUPT: PLAY/PAUSE");
+            break;
+          case "ArrowRight":
+            if (globalPlayer) globalPlayer.nextTrack();
+            break;
+          case "ArrowLeft":
+            if (globalPlayer) globalPlayer.previousTrack();
+            break;
+          case "ArrowUp":
+            e.preventDefault();
+            if (globalPlayer) {
+              globalPlayer.getVolume().then((vol) => {
+                let newVol = Math.min(vol + 0.1, 1.0); // Máximo 100%
+                globalPlayer.setVolume(newVol);
+                const volSlider = document.getElementById("sys-volume");
+                if (volSlider) volSlider.value = newVol;
+              });
+            }
+            break;
+          case "ArrowDown":
+            e.preventDefault();
+            if (globalPlayer) {
+              globalPlayer.getVolume().then((vol) => {
+                let newVol = Math.max(vol - 0.1, 0.0); // Mínimo 0%
+                globalPlayer.setVolume(newVol);
+                const volSlider = document.getElementById("sys-volume");
+                if (volSlider) volSlider.value = newVol;
+              });
+            }
+            break;
+          case "Escape":
+            // Si el sistema está en modo "HUD: OFF" (Menús ocultos), los trae de vuelta
+            const sysBtn = document.getElementById("nav-system");
+            if (sysBtn && sysBtn.innerText === "HUD: OFF") sysBtn.click();
+            break;
+        }
+
+        // Atajos de letras (usamos e.key para mayor precisión)
+        if (e.key.toLowerCase() === "t") {
+          const termBtn = document.getElementById("nav-terminal");
+          if (termBtn) termBtn.click();
+        }
+      });
+    </script>
+  </body>
+</html>
