@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ARCHAEOLOGIST_OS | ARES RETRO EDITION</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700;900&family=Work+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-variant": "#353534",
+                        "surface-bright": "#3a3939",
+                        "primary-container": "#00ff41",
+                        "primary": "#ebffe2",
+                        "on-primary": "#003907",
+                        "surface": "#131313",
+                        "outline": "#84967e",
+                        "outline-variant": "#3b4b37",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-container": "#201f1f",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#b9ccb2",
+                        "background": "#131313",
+                        "tertiary-fixed-dim": "#00daf3",
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Work Sans"],
+                        "mono": ["Space Grotesk"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .crt-overlay {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
+        .dither-bg { background-image: radial-gradient(#3B4B37 0.5px, transparent 0.5px); background-size: 3px 3px; }
+        .beveled-inset { box-shadow: inset 2px 2px 0px 0px #0e0e0e, inset -1px -1px 0px 0px #3b4b37; }
+        .glow-text { text-shadow: 0 0 8px #00ff41; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3B4B37; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #00ff41; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body overflow-hidden selection:bg-primary-container selection:text-on-primary">
+    <header class="bg-[#131313] dark:bg-[#131313] fixed top-0 w-full z-50 flex justify-between items-center px-6 py-3 border-b border-[#3B4B37]/20">
+        <div class="flex items-center gap-8">
+            <span class="font-['Space_Grotesk'] font-black text-[#00FF41] tracking-tighter text-xl">ARES_OS</span>
+            <nav class="hidden md:flex gap-6">
+                <a id="nav-system" class="font-['Space_Grotesk'] uppercase tracking-widest text-sm text-[#00FF41] border-b-2 border-[#00FF41] pb-1" href="#">SYSTEM</a>
+                <a id="nav-decode" class="font-['Space_Grotesk'] uppercase tracking-widest text-sm text-[#B9CCB2] hover:text-[#00FF41] transition-colors duration-100" href="#">DECODE</a>
+                <a id="nav-archive" class="font-['Space_Grotesk'] uppercase tracking-widest text-sm text-[#B9CCB2] hover:text-[#00FF41] transition-colors duration-100" href="#">ARCHIVE</a>
+            </nav>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative hidden sm:block">
+                <input id="query-stream-input" class="bg-surface-container-lowest border-none beveled-inset text-primary-container placeholder:text-outline-variant text-xs font-mono py-1 px-3 w-48 focus:ring-0" placeholder="QUERY_STREAM..." type="text"/>
+            </div>
+            <span id="settings-btn" class="material-symbols-outlined text-[#B9CCB2] hover:text-[#00FF41] cursor-pointer" data-icon="settings">settings</span>
+            <span id="terminal-btn" class="material-symbols-outlined text-[#B9CCB2] hover:text-[#00FF41] cursor-pointer" data-icon="terminal">terminal</span>
+        </div>
+    </header>
+
+    <div class="flex h-screen pt-14 pb-20">
+        <aside class="bg-[#1C1B1B] dark:bg-[#1C1B1B] h-full w-64 hidden lg:flex flex-col border-r border-[#3B4B37]/20 py-4">
+            <div class="px-4 mb-8 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden">
+                    <img alt="OPERATOR_01" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=Op&background=00ff41&color=003907"/>
+                </div>
+                <div>
+                    <h3 class="font-['Work_Sans'] font-mono text-xs uppercase text-primary-container font-bold">OPERATOR_01</h3>
+                    <p class="font-['Work_Sans'] font-mono text-[10px] uppercase text-[#B9CCB2]">STATUS: DECODING</p>
+                </div>
+            </div>
+            <nav class="flex-1 space-y-1">
+                <a id="nav-collection" class="bg-[#00FF41] text-[#003907] font-bold p-3 flex items-center gap-3 transition-transform active:translate-x-1" href="#">
+                    <span class="material-symbols-outlined" data-icon="library_music">library_music</span>
+                    <span class="font-['Work_Sans'] font-mono text-xs uppercase">COLLECTION</span>
+                </a>
+                <a id="nav-frequency" class="text-[#B9CCB2] p-3 flex items-center gap-3 hover:bg-[#3A3939] transition-transform active:translate-x-1" href="#">
+                    <span class="material-symbols-outlined" data-icon="radar">radar</span>
+                    <span class="font-['Work_Sans'] font-mono text-xs uppercase">FREQUENCY</span>
+                </a>
+                <a id="nav-bitstream" class="text-[#B9CCB2] p-3 flex items-center gap-3 hover:bg-[#3A3939] transition-transform active:translate-x-1" href="#">
+                    <span class="material-symbols-outlined" data-icon="dataset">dataset</span>
+                    <span class="font-['Work_Sans'] font-mono text-xs uppercase">BITSTREAM</span>
+                </a>
+                <a id="nav-vault"class="text-[#B9CCB2] p-3 flex items-center gap-3 hover:bg-[#3A3939] transition-transform active:translate-x-1" href="#">
+                    <span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+                    <span class="font-['Work_Sans'] font-mono text-xs uppercase">VAULT</span>
+                </a>
+                <a id="nav-terminal" class="text-[#B9CCB2] p-3 flex items-center gap-3 hover:bg-[#3A3939] transition-transform active:translate-x-1" href="#">
+                    <span class="material-symbols-outlined" data-icon="code">code</span>
+                    <span class="font-['Work_Sans'] font-mono text-xs uppercase">TERMINAL</span>
+                </a>
+            </nav>
+            <div class="px-4 mt-auto">
+                <button id="auth-btn" class="w-full bg-primary-container text-on-primary font-mono text-xs font-bold py-2 tracking-widest hover:brightness-110 active:scale-95 transition-all">
+                    MOUNT_DRIVE
+                </button>
+                <div id="logout-cmbols-outlined" data-icon="code">code</span>
+                  ontainer" class="mt-4 text-[#B9CCB2] p-3 flex items-center gap-3 hover:bg-[#3A3939] cursor-pointer">
+                    <span class="material-symbols-outlined" data-icon="power_settings_new">power_settings_new</span>
+                    <span class="font-['Work_Sans'] font-mono text-xs uppercase">LOGOUT</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col md:flex-row relative overflow-hidden">
+            <section class="w-full md:flex-grow bg-surface-container-lowest relative flex flex-col items-center justify-center overflow-hidden border-r border-outline-variant/10">
+                <div class="absolute inset-0 dither-bg opacity-20"></div>
+                <div class="absolute inset-0 bg-gradient-to-br from-primary-container/5 via-transparent to-tertiary-fixed-dim/5"></div>
+                
+                <div class="relative w-full h-full flex items-center justify-center p-8">
+                    <div class="absolute top-8 left-8 flex flex-col gap-1">
+                        <span class="text-primary-container font-mono text-[10px] tracking-[0.2em] uppercase">Visualizer_Stream_Alpha</span>
+                        <span class="text-tertiary-fixed-dim font-mono text-[10px] tracking-[0.2em] uppercase">SIGNAL_STRENGTH: 98.4%</span>
+                    </div>
+                    
+                    <div class="w-full max-w-lg aspect-square relative">
+                        <div id="ferrofluid-container" class="w-full h-full mix-blend-screen opacity-90 drop-shadow-[0_0_20px_rgba(0,255,65,0.4)]"></div>
+                        <div class="absolute inset-0 pointer-events-none border border-primary-container/20"></div>
+                    </div>
+                    
+                    <div class="absolute bottom-8 left-8 right-8">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <h1 id="track-title" class="font-headline font-black text-4xl md:text-5xl lg:text-7xl text-primary-container glow-text leading-none uppercase tracking-tighter">ARES SYSTEM</h1>
+                                <p id="track-artist" class="font-mono text-xs text-[#B9CCB2] mt-2 uppercase tracking-widest opacity-80">Phase: Standby // 00:00 / 00:00</p>
+                            </div>
+                            <div class="text-right hidden sm:block">
+                                <p class="font-mono text-[10px] text-tertiary-fixed-dim uppercase">Buffer: Stable</p>
+                                <p class="font-mono text-[10px] text-tertiary-fixed-dim uppercase">Bitrate: 1411kbps</p>
+                            </div>
+                        </div>
+                        <div class="h-2 w-full bg-surface-container-low flex gap-0.5 overflow-hidden border border-outline-variant/20 p-[1px]">
+                           <div id="progress-container" class="h-2 w-full bg-surface-container-high/50 overflow-hidden border border-outline-variant/20 cursor-pointer relative group p-[1px]">
+                            <div id="progress-bar" class="h-full bg-primary-container w-0 transition-all duration-300 relative">
+                                <div class="absolute right-0 top-0 bottom-0 w-1 bg-white opacity-0 group-hover:opacity-100 shadow-[0_0_8px_#ffffff]"></div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="right-panel" class="w-full md:w-2/5 bg-surface flex flex-col relative z-10">
+                <div id="btn-toggle-panel" class="absolute -left-6 top-1/2 -translate-y-1/2 w-6 h-16 bg-surface-container-low border border-outline-variant/20 rounded-l-md flex items-center justify-center cursor-pointer text-[#B9CCB2] hover:text-[#00FF41] shadow-[-4px_0_10px_rgba(0,0,0,0.3)] z-50">
+        <span id="toggle-chevron" class="material-symbols-outlined text-sm transition-transform duration-500" data-icon="chevron_right">chevron_right</span>
+    </div>
+                <div class="p-6 border-b border-outline-variant/20 bg-surface-container-low">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-headline font-bold text-lg text-primary-container tracking-widest uppercase">Stream_Queue</h2>
+                        <span class="text-[#B9CCB2] font-mono text-[10px]">VER: 4.2.0_ARES</span>
+                    </div>
+                    <div class="relative group">
+                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-primary-container">
+                            <span class="material-symbols-outlined text-sm" data-icon="search">search</span>
+                        </div>
+                        <input id="search-input" class="w-full bg-surface-container-lowest border-none beveled-inset pl-10 pr-4 py-3 text-xs font-mono text-primary-container placeholder:text-outline-variant focus:ring-1 focus:ring-primary-container transition-all" placeholder="FILTER_TRACKS..." type="text"/>
+                    </div>
+                </div>
+                
+                <div id="track-list" class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-2">
+                    <div class="text-center p-8 text-outline-variant font-mono text-xs">
+                        <p>> WAITING FOR QUERY...</p>
+                        <p>> OR CLICK 'ARCHIVE' TO LOAD PLAYLISTS</p>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-surface-container-lowest border-t border-outline-variant/20 font-mono text-[9px] text-primary-container/60 space-y-1">
+                    <p id="sys-buffer-status">> LOADING_BUFFER... SUCCESS</p>
+                    <p id="sys-codec-status">> DECODING_FLAC... 1411KBPS_STABLE</p>
+                    <p id="sys-vis-status">> RENDERING_WAVEFORM... [|||||||||||||]</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-8 py-2 bg-[#0E0E0E] dark:bg-[#0E0E0E] h-20 border-t border-[#3B4B37] shadow-[0_-4px_12px_rgba(0,255,65,0.1)]">
+        <button id="btn-prev" class="flex flex-col items-center justify-center text-[#B9CCB2] opacity-60 hover:opacity-100 hover:text-[#72FF70] transition-all active:scale-90 duration-75">
+            <span class="material-symbols-outlined" data-icon="skip_previous">skip_previous</span>
+            <span class="font-['Work_Sans'] font-mono text-[10px] uppercase">PREV</span>
+        </button>
+        <button id="btn-play" class="flex flex-col items-center justify-center text-[#00FF41] drop-shadow-[0_0_5px_#00E639] hover:scale-110 active:scale-90 duration-75">
+            <div class="bg-primary-container text-on-primary p-2 mb-1">
+                <span id="play-icon" class="material-symbols-outlined !text-4xl" data-icon="play_arrow">play_arrow</span>
+            </div>
+            <span class="font-['Work_Sans'] font-mono text-[10px] uppercase">PLAY</span>
+        </button>
+        <button id="btn-next" class="flex flex-col items-center justify-center text-[#B9CCB2] opacity-60 hover:opacity-100 hover:text-[#72FF70] transition-all active:scale-90 duration-75">
+            <span class="material-symbols-outlined" data-icon="skip_next">skip_next</span>
+            <span class="font-['Work_Sans'] font-mono text-[10px] uppercase">NEXT</span>
+        </button>
+        <button id="btn-lyrics" class="flex flex-col items-center justify-center text-[#B9CCB2] opacity-60 hover:opacity-100 hover:text-[#72FF70] transition-all active:scale-90 duration-75">
+            <span class="material-symbols-outlined" data-icon="subtitles">subtitles</span>
+            <span class="font-['Work_Sans'] font-mono text-[10px] uppercase">LYRICS</span>
+        </button>
+        <button id="btn-shuffle" class="flex flex-col items-center justify-center text-[#B9CCB2] opacity-60 hover:opacity-100 hover:text-[#72FF70] transition-all active:scale-90 duration-75">
+            <span class="material-symbols-outlined" data-icon="shuffle">shuffle</span>
+            <span class="font-['Work_Sans'] font-mono text-[10px] uppercase">SHUFFLE</span>
+        </button>
+        
+        <div class="flex flex-col items-center justify-center text-[#B9CCB2] w-24 group">
+            <span class="material-symbols-outlined text-sm opacity-60 group-hover:opacity-100 transition-opacity" data-icon="volume_up">volume_up</span>
+            <input id="sys-volume" type="range" min="0" max="1" step="0.05" value="0.5" 
+                   class="w-full h-1 bg-surface-container-high appearance-none cursor-pointer accent-primary-container opacity-60 group-hover:opacity-100 transition-opacity mt-1">
+        </div>
+    </footer>
+
+    <div class="fixed inset-0 crt-overlay opacity-30 pointer-events-none z-[100]"></div>
+
+    <script src="app.js" defer></script>
+</body>
+</html>
